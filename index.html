@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSC 225 Lab 6 - Consuming a REST API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-4">
+    <h1 class="mb-3">Cat Facts</h1>
+
+    <!-- Existing picture that will be replaced by the API's catPhoto -->
+    <img id="catPic" src="https://placehold.co/800x450?text=Cat+Photo"
+         class="img-fluid rounded mb-3" alt="Cat photo">
+
+    <button id="loadBtn" class="btn btn-primary mb-3">Load Cat Facts</button>
+
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>factId</th>
+          <th>fact</th>
+        </tr>
+      </thead>
+      <tbody id="factsBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_URL = "https://brianobruno.github.io/cats.json";
+
+    document.getElementById("loadBtn").addEventListener("click", loadCatData);
+
+    async function loadCatData() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error("HTTP error " + response.status);
+        }
+        const data = await response.json();
+
+        // Sort facts by factId (1 first, 5 last)
+        const facts = [...data.facts].sort((a, b) => a.factId - b.factId);
+
+        // Fill the table
+        const tbody = document.getElementById("factsBody");
+        tbody.innerHTML = "";
+        facts.forEach(f => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${f.factId}</td><td>${f.text}</td>`;
+          tbody.appendChild(row);
+        });
+
+        // Replace the picture with the URL from the API
+        document.getElementById("catPic").src = data.catPhoto;
+      } catch (err) {
+        console.error(err);
+        alert("Could not load data: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
